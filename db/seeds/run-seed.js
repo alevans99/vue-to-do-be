@@ -1,0 +1,16 @@
+const devData = require('../development-data/notes')
+const seed = require('./seed.js')
+const db = require('../connection.js')
+
+//For production builds, create the table and add the base data,
+const runSeed = async () => {
+    try {
+        await seed(devData)
+        db.end()
+
+    } catch (error) {
+        console.log('Error Seeding DB, ', error)
+    }
+}
+
+runSeed()
