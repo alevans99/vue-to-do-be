@@ -96,14 +96,12 @@ describe("app.js", () => {
 
       it('should allow queries to sort by title', () => {
         return request(app)
-        .get("/api/notes/test?order=asc")
+        .get("/api/notes/test?order=asc&order_by=title")
         .then(({ body: { notes } }) => {
             let referenceTitle = ''
             let orderedByTitle = true
 
             for (note of notes){
-                console.log('checking ', note.note_title)
-
                 if (referenceTitle === ''){
                     referenceTitle = note.note_title
                 }
@@ -118,6 +116,48 @@ describe("app.js", () => {
           
       });
 
+      it('should allow queries to sort by priority', () => {
+        return request(app)
+        .get("/api/notes/test?order=desc&order_by=priority")
+        .then(({ body: { notes } }) => {
+            let referencePriority = -1
+            let orderedByPriority = true
+
+            for (note of notes){
+                if (referencePriority === -1){
+                  referencePriority = note.priority
+                }
+                if (note.priority > referencePriority){
+                  orderedByPriority = false
+                }
+                referencePriority = note.priority
+            }
+            expect(orderedByPriority).toBe(true)
+
+        })
+          
+      });
+
+      it('should allow queries to sort by deadline', () => {
+        return request(app)
+        .get("/api/notes/test?order=asc&order_by=deadline")
+        .then(({ body: { notes } }) => {
+            let referenceDate = ''
+            let orderedByDate = true
+            for (note of notes){
+                if (referenceDate === ''){
+                    referenceDate = note.deadline
+                }
+                if (note.deadline < referenceDate){
+                    orderedByDate = false
+                }
+                referenceDate = note.deadline
+            }
+            expect(orderedByDate).toBe(true)
+
+        })
+          
+      });
 
     })
 
