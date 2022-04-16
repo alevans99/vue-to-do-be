@@ -28,6 +28,40 @@ describe("app.js", () => {
     })
   })
 
+  describe('/api/notes', () => {
+    
+    describe('POST', () => {
+      it('should return a 201 status and the new note when posted', () => {
+        return request(app)
+        .post("/api/notes")
+        .send({
+          "note": {
+            "listId": "test",
+            "title": "This is a new title from insomnia",
+            "text": "Here is all the text from the insomnia test",
+            "timestamp": "2022-04-16T14:06:00.000Z",
+            "priority": 1,
+            "deadline": "2022-04-18T17:30:00.000Z"
+          }
+        })
+        .expect(201)
+        .then(({ body: { note } }) => {
+          expect(Object.keys(note)).toHaveLength(7)
+            expect(note).toMatchObject({
+              note_id: expect.any(Number),
+              list_id: expect.any(String),
+              note_title: expect.any(String),
+              note_text: expect.any(String),
+              timestamp: expect.any(String),
+              priority: expect.any(Number),
+              deadline: expect.any(String),
+            })
+        })
+      });
+    });
+
+  });
+
   describe("/api/notes/:list_id", () => {
 
     describe("GET", () => {

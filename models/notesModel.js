@@ -1,5 +1,5 @@
 const db = require("../db/connection")
-
+const luxon = require("luxon")
 exports.selectAllNotesByListId = async (
   listId,
   orderBy = "date",
@@ -35,4 +35,46 @@ exports.selectAllNotesByListId = async (
   const { rows: notes } = await db.query(queryString, [listId])
 
   return { notes }
+}
+
+exports.insertNewNote = async (newNote) => {
+  const noteColumns = {
+    listId: "string",
+    title: "string",
+    text: "string",
+    timestamp: "string",
+    priority: "number",
+    deadline: "string",
+  }
+  
+  //Check new note has all required values and they are the correct type
+  if (Object.keys(newNote).length !== 6) {
+    return Promise.reject({ status: 400, message: "Invalid note format" })
+  }
+  for (key of Object.keys(newNote)) {
+    if (
+      noteColumns[key] === undefined ||
+      typeof newNote[key] !== noteColumns[key]
+    ) {
+      return Promise.reject({ status: 400, message: "Invalid note format" })
+    }
+  }
+  const queryString = `
+  INSERT INTO notes 
+  (list_id, note_title, note_text, timestamp, priority, deadline) 
+  VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
+  `
+  const {
+    rows: [note],
+  } = await db.query(queryString, [
+    newNote.listId,
+    newNote.title,
+    newNote.text,
+    newNote.timestamp,
+    newNote.priority,
+    newNote.deadline,
+  ])
+
+  return {note}
+
 }
