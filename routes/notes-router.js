@@ -1,5 +1,5 @@
 const notesRouter = require('express').Router()
-const { getAllNotesByListId, addNewNote, updateNote } = require('../controllers/notesController')
+const { getAllNotesByListId, addNewNote, updateNote, removeNoteById } = require('../controllers/notesController')
 
 notesRouter
 .route("/")
@@ -11,6 +11,8 @@ notesRouter
 .get(getAllNotesByListId)
 
 
-
+notesRouter
+.route("/:list_id/:note_id")
+.delete(removeNoteById)
 
 module.exports = notesRouter

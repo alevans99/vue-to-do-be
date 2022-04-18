@@ -63,7 +63,7 @@ describe("app.js", () => {
 
     describe('PATCH', () => {
       it('should return a 201 status and the updated note when patched', () => {
-       // const newDeadline = DateTime.fromMillis(1890150000000).toSQL()
+
         return request(app)
         .patch("/api/notes")
         .send({
@@ -237,6 +237,28 @@ describe("app.js", () => {
 
     })
 
+
+    describe('/api/notes/:list_id/:note_id', () => {
+      
+      describe('DELETE', () => {
+        it('should remove the note and return a 204 status', () => {
+          
+          return request(app)
+          .delete("/api/notes/test/1")
+          .expect(204)
+          .then(() => {
+            return request(app)
+            .get("/api/notes/test")
+            .expect(200)
+            .then(({ body: { notes } }) => {
+              expect(notes).toHaveLength(1)
+            })
+          })
+
+        });
+      });
+
+    });
 
   })
 })

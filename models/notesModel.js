@@ -1,5 +1,5 @@
 const db = require("../db/connection")
-const {DateTime} = require("luxon")
+const { DateTime } = require("luxon")
 exports.selectAllNotesByListId = async (
   listId,
   orderBy = "date",
@@ -45,7 +45,7 @@ exports.insertNewNote = async (newNote) => {
     priority: "number",
     deadline: "string",
   }
-  
+
   //Check new note has all required values and they are the correct type
   if (Object.keys(newNote).length !== 6) {
     return Promise.reject({ status: 400, message: "Invalid note format" })
@@ -75,12 +75,10 @@ exports.insertNewNote = async (newNote) => {
     newNote.deadline,
   ])
 
-  return {note}
-
+  return { note }
 }
 
 exports.patchNote = async (noteToInsert) => {
-
   const noteColumns = {
     noteId: "number",
     listId: "string",
@@ -90,7 +88,7 @@ exports.patchNote = async (noteToInsert) => {
     priority: "number",
     deadline: "string",
   }
-  
+
   //Check updated note has all required values and they are the correct type
   if (Object.keys(noteToInsert).length !== 7) {
     return Promise.reject({ status: 400, message: "Invalid note format" })
@@ -104,11 +102,13 @@ exports.patchNote = async (noteToInsert) => {
     }
   }
   //Check that note to be updated exists
-  const { rows: existingNotes } = await db.query('SELECT * FROM notes WHERE note_id = $1', [noteToInsert.noteId])
+  const { rows: existingNotes } = await db.query(
+    "SELECT * FROM notes WHERE note_id = $1",
+    [noteToInsert.noteId]
+  )
 
-  if (existingNotes.length !== 1){
+  if (existingNotes.length !== 1) {
     return Promise.reject({ status: 400, message: "Invalid note" })
-
   }
 
   const queryString = `
@@ -123,9 +123,43 @@ exports.patchNote = async (noteToInsert) => {
     noteToInsert.text,
     noteToInsert.priority,
     DateTime.fromISO(noteToInsert.deadline).toSQL(),
-    noteToInsert.noteId
+    noteToInsert.noteId,
   ])
 
-  return {note}
+  return { note }
+}
 
+exports.deleteNote = async (noteToDelete) => {
+  const noteColumns = {
+    noteId: "number",
+    listId: "string",
+  }
+
+  for (key of Object.keys(noteToDelete)) {
+    if (
+      noteColumns[key] === undefined ||
+      typeof noteToDelete[key] !== noteColumns[key]
+    ) {
+      return Promise.reject({ status: 404, message: "Note not found" })
+    }
+  }
+
+  const { rows: existingNotes } = await db.query(
+    "SELECT * FROM notes WHERE note_id = $1 AND list_id = $2",
+    [noteToDelete.noteId, noteToDelete.listId]
+  )
+
+  if (existingNotes.length !== 1) {
+    return Promise.reject({ status: 404, message: "Note not found" })
+  }
+
+  const queryString = `
+  DELETE from notes
+  WHERE note_id = $1 AND list_id = $2 RETURNING *;
+  `
+  const {
+    rows: [note],
+  } = await db.query(queryString, [noteToDelete.noteId, noteToDelete.listId])
+
+  return { note }
 }
