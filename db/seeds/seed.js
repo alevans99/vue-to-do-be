@@ -11,16 +11,16 @@ const seed = async (data) => {
                 list_id TEXT NOT NULL,
                 note_title TEXT NOT NULL,
                 note_text TEXT NOT NULL,
-                timestamp DATE NOT NULL,
+                timestamp TIMESTAMP NOT NULL,
                 priority INTEGER DEFAULT 2,
-                deadline DATE NOT NULL
+                deadline TIMESTAMP NOT NULL
             );`
     );
     const notesToInsert = noteData;
     const insertRequests = [];
 
     notesToInsert.forEach((note) => {
-      console.log("adding ", note);
+
       insertRequests.push(
         db.query(
           `

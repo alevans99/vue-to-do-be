@@ -1,5 +1,5 @@
-const { selectAllNotesByListId, insertNewNote } = require("../models/notesModel")
-
+const { selectAllNotesByListId, insertNewNote, patchNote } = require("../models/notesModel")
+const {DateTime} = require('luxon')
 exports.getAllNotesByListId = async (req, res, next) => {
   try {
     const { list_id: listId } = req.params
@@ -13,10 +13,21 @@ exports.getAllNotesByListId = async (req, res, next) => {
 
 exports.addNewNote = async (req, res, next) => {
   try {
-    console.log('here I am' , req.body.note)
     const noteToAdd = req.body.note
     const addedNote = await insertNewNote(noteToAdd)
     res.status(201).send(addedNote)
+  } catch (error) {
+    next(error)
+  }
+}
+
+exports.updateNote = async (req, res, next) => {
+  try {
+    const noteToUpdate = req.body.note
+    const updatedNote = await patchNote(noteToUpdate)
+
+    res.status(201).send(updatedNote)
+
   } catch (error) {
     next(error)
   }

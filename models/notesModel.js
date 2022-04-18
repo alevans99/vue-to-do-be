@@ -1,5 +1,5 @@
 const db = require("../db/connection")
-const luxon = require("luxon")
+const {DateTime} = require("luxon")
 exports.selectAllNotesByListId = async (
   listId,
   orderBy = "date",
@@ -17,7 +17,6 @@ exports.selectAllNotesByListId = async (
     asc: "ASC",
     desc: "DESC",
   }
-  console.log(`Model receieved ${orderBy} ${orderDirection} `)
   const orderRequested = orderCriteria[orderBy]
   const orderDirectionRequested = orderDirectionCriteria[orderDirection]
 
@@ -64,6 +63,7 @@ exports.insertNewNote = async (newNote) => {
   (list_id, note_title, note_text, timestamp, priority, deadline) 
   VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
   `
+
   const {
     rows: [note],
   } = await db.query(queryString, [
@@ -73,6 +73,57 @@ exports.insertNewNote = async (newNote) => {
     newNote.timestamp,
     newNote.priority,
     newNote.deadline,
+  ])
+
+  return {note}
+
+}
+
+exports.patchNote = async (noteToInsert) => {
+
+  const noteColumns = {
+    noteId: "number",
+    listId: "string",
+    title: "string",
+    text: "string",
+    timestamp: "string",
+    priority: "number",
+    deadline: "string",
+  }
+  
+  //Check updated note has all required values and they are the correct type
+  if (Object.keys(noteToInsert).length !== 7) {
+    return Promise.reject({ status: 400, message: "Invalid note format" })
+  }
+  for (key of Object.keys(noteToInsert)) {
+    if (
+      noteColumns[key] === undefined ||
+      typeof noteToInsert[key] !== noteColumns[key]
+    ) {
+      return Promise.reject({ status: 400, message: "Invalid note format" })
+    }
+  }
+  //Check that note to be updated exists
+  const { rows: existingNotes } = await db.query('SELECT * FROM notes WHERE note_id = $1', [noteToInsert.noteId])
+
+  if (existingNotes.length !== 1){
+    return Promise.reject({ status: 400, message: "Invalid note" })
+
+  }
+
+  const queryString = `
+  UPDATE notes
+  SET note_title = $1, note_text = $2, priority = $3, deadline = $4
+  WHERE note_id = $5 RETURNING *;
+  `
+  const {
+    rows: [note],
+  } = await db.query(queryString, [
+    noteToInsert.title,
+    noteToInsert.text,
+    noteToInsert.priority,
+    DateTime.fromISO(noteToInsert.deadline).toSQL(),
+    noteToInsert.noteId
   ])
 
   return {note}

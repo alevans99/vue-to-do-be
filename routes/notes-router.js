@@ -1,9 +1,10 @@
 const notesRouter = require('express').Router()
-const { getAllNotesByListId, addNewNote } = require('../controllers/notesController')
+const { getAllNotesByListId, addNewNote, updateNote } = require('../controllers/notesController')
 
 notesRouter
 .route("/")
 .post(addNewNote)
+.patch(updateNote)
 
 notesRouter
 .route("/:list_id")
