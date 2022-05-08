@@ -108,7 +108,7 @@ exports.patchNote = async (noteToInsert) => {
   )
 
   if (existingNotes.length !== 1) {
-    return Promise.reject({ status: 400, message: "Invalid note" })
+    return Promise.reject({ status: 404, message: "Note not found" })
   }
 
   const queryString = `
@@ -133,6 +133,12 @@ exports.deleteNote = async (noteToDelete) => {
   const noteColumns = {
     noteId: "number",
     listId: "string",
+  }
+
+  if (
+    Number.isNaN(noteToDelete.noteId)
+  ) {
+    return Promise.reject({ status: 404, message: "Note not found" })
   }
 
   for (key of Object.keys(noteToDelete)) {
