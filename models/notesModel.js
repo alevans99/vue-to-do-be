@@ -1,33 +1,33 @@
-const db = require("../db/connection")
-const { DateTime } = require("luxon")
+const db = require('../db/connection')
+const { DateTime } = require('luxon')
 exports.selectAllNotesByListId = async (
   listId,
-  orderBy = "date",
-  orderDirection = "desc"
+  orderBy = 'date',
+  orderDirection = 'desc'
 ) => {
   const orderCriteria = {
-    note: "note_id",
-    date: "timestamp",
-    title: "note_title",
-    deadline: "deadline",
-    priority: "priority",
+    note: 'note_id',
+    date: 'timestamp',
+    title: 'note_title',
+    deadline: 'deadline',
+    priority: 'priority',
   }
 
   const orderDirectionCriteria = {
-    asc: "ASC",
-    desc: "DESC",
+    asc: 'ASC',
+    desc: 'DESC',
   }
   const orderRequested = orderCriteria[orderBy]
   const orderDirectionRequested = orderDirectionCriteria[orderDirection]
 
   //Check the requested order is valid
   if (orderRequested === undefined || orderDirectionRequested == undefined) {
-    return Promise.reject({ status: 400, message: "Invalid request" })
+    return Promise.reject({ status: 400, message: 'Invalid request' })
   }
 
   //Validate ID formatting
   if (/\s/.test(listId)) {
-    return Promise.reject({ status: 400, message: "Invalid list requested" })
+    return Promise.reject({ status: 400, message: 'Invalid list requested' })
   }
 
   const queryString = `SELECT * FROM notes WHERE list_id = $1 ORDER BY ${orderRequested} ${orderDirectionRequested};`
@@ -38,24 +38,24 @@ exports.selectAllNotesByListId = async (
 
 exports.insertNewNote = async (newNote) => {
   const noteColumns = {
-    listId: "string",
-    title: "string",
-    text: "string",
-    timestamp: "string",
-    priority: "number",
-    deadline: "string",
+    listId: 'string',
+    title: 'string',
+    text: 'string',
+    timestamp: 'string',
+    priority: 'number',
+    deadline: 'string',
   }
 
   //Check new note has all required values and they are the correct type
   if (Object.keys(newNote).length !== 6) {
-    return Promise.reject({ status: 400, message: "Invalid note format" })
+    return Promise.reject({ status: 400, message: 'Invalid note format' })
   }
   for (key of Object.keys(newNote)) {
     if (
       noteColumns[key] === undefined ||
       typeof newNote[key] !== noteColumns[key]
     ) {
-      return Promise.reject({ status: 400, message: "Invalid note format" })
+      return Promise.reject({ status: 400, message: 'Invalid note format' })
     }
   }
   const queryString = `
@@ -80,35 +80,35 @@ exports.insertNewNote = async (newNote) => {
 
 exports.patchNote = async (noteToInsert) => {
   const noteColumns = {
-    noteId: "number",
-    listId: "string",
-    title: "string",
-    text: "string",
-    timestamp: "string",
-    priority: "number",
-    deadline: "string",
+    noteId: 'number',
+    listId: 'string',
+    title: 'string',
+    text: 'string',
+    timestamp: 'string',
+    priority: 'number',
+    deadline: 'string',
   }
 
   //Check updated note has all required values and they are the correct type
   if (Object.keys(noteToInsert).length !== 7) {
-    return Promise.reject({ status: 400, message: "Invalid note format" })
+    return Promise.reject({ status: 400, message: 'Invalid note format' })
   }
   for (key of Object.keys(noteToInsert)) {
     if (
       noteColumns[key] === undefined ||
       typeof noteToInsert[key] !== noteColumns[key]
     ) {
-      return Promise.reject({ status: 400, message: "Invalid note format" })
+      return Promise.reject({ status: 400, message: 'Invalid note format' })
     }
   }
   //Check that note to be updated exists
   const { rows: existingNotes } = await db.query(
-    "SELECT * FROM notes WHERE note_id = $1",
+    'SELECT * FROM notes WHERE note_id = $1',
     [noteToInsert.noteId]
   )
 
   if (existingNotes.length !== 1) {
-    return Promise.reject({ status: 404, message: "Note not found" })
+    return Promise.reject({ status: 404, message: 'Note not found' })
   }
 
   const queryString = `
@@ -131,14 +131,12 @@ exports.patchNote = async (noteToInsert) => {
 
 exports.deleteNote = async (noteToDelete) => {
   const noteColumns = {
-    noteId: "number",
-    listId: "string",
+    noteId: 'number',
+    listId: 'string',
   }
 
-  if (
-    Number.isNaN(noteToDelete.noteId)
-  ) {
-    return Promise.reject({ status: 404, message: "Note not found" })
+  if (Number.isNaN(noteToDelete.noteId)) {
+    return Promise.reject({ status: 404, message: 'Note not found' })
   }
 
   for (key of Object.keys(noteToDelete)) {
@@ -146,17 +144,17 @@ exports.deleteNote = async (noteToDelete) => {
       noteColumns[key] === undefined ||
       typeof noteToDelete[key] !== noteColumns[key]
     ) {
-      return Promise.reject({ status: 404, message: "Note not found" })
+      return Promise.reject({ status: 404, message: 'Note not found' })
     }
   }
 
   const { rows: existingNotes } = await db.query(
-    "SELECT * FROM notes WHERE note_id = $1 AND list_id = $2",
+    'SELECT * FROM notes WHERE note_id = $1 AND list_id = $2',
     [noteToDelete.noteId, noteToDelete.listId]
   )
 
   if (existingNotes.length !== 1) {
-    return Promise.reject({ status: 404, message: "Note not found" })
+    return Promise.reject({ status: 404, message: 'Note not found' })
   }
 
   const queryString = `

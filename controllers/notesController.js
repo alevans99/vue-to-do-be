@@ -3,11 +3,13 @@ const {
   insertNewNote,
   patchNote,
   deleteNote,
-} = require("../models/notesModel")
-const { DateTime } = require("luxon")
+} = require('../models/notesModel')
+const { DateTime } = require('luxon')
 exports.getAllNotesByListId = async (req, res, next) => {
   try {
     const { list_id: listId } = req.params
+    console.log('received request for list ', listId)
+
     const { order: orderDirection, order_by: orderBy } = req.query
     const notes = await selectAllNotesByListId(listId, orderBy, orderDirection)
     res.status(200).send(notes)
