@@ -45,15 +45,19 @@ exports.insertNewNote = async (newNote) => {
     priority: 'number',
     deadline: 'string',
   }
-
+  const nullAllowed = ['deadline']
   //Check new note has all required values and they are the correct type
   if (Object.keys(newNote).length !== 6) {
     return Promise.reject({ status: 400, message: 'Invalid note format' })
   }
+  //Only allows a note if the required field exists, if it matches the expected type
+  //or is an optional null value
   for (key of Object.keys(newNote)) {
     if (
       noteColumns[key] === undefined ||
-      typeof newNote[key] !== noteColumns[key]
+      (typeof newNote[key] !== noteColumns[key] &&
+        newNote[key] === null &&
+        !nullAllowed.includes(key))
     ) {
       return Promise.reject({ status: 400, message: 'Invalid note format' })
     }
@@ -63,7 +67,6 @@ exports.insertNewNote = async (newNote) => {
   (list_id, note_title, note_text, timestamp, priority, deadline) 
   VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;
   `
-
   const {
     rows: [note],
   } = await db.query(queryString, [

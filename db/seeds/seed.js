@@ -1,10 +1,10 @@
-db = require("../connection");
+db = require('../connection')
 
 const seed = async (data) => {
-  const noteData = data;
+  const noteData = data
 
   try {
-    await db.query("DROP TABLE IF EXISTS notes;");
+    await db.query('DROP TABLE IF EXISTS notes;')
     await db.query(
       `CREATE TABLE notes (
                 note_id SERIAL PRIMARY KEY,
@@ -13,14 +13,13 @@ const seed = async (data) => {
                 note_text TEXT NOT NULL,
                 timestamp TIMESTAMP NOT NULL,
                 priority INTEGER DEFAULT 2,
-                deadline TIMESTAMP NOT NULL
+                deadline TIMESTAMP DEFAULT NULL
             );`
-    );
-    const notesToInsert = noteData;
-    const insertRequests = [];
+    )
+    const notesToInsert = noteData
+    const insertRequests = []
 
     notesToInsert.forEach((note) => {
-
       insertRequests.push(
         db.query(
           `
@@ -35,13 +34,13 @@ const seed = async (data) => {
             note.deadline,
           ]
         )
-      );
-    });
+      )
+    })
 
-    return await Promise.all(insertRequests);
+    return await Promise.all(insertRequests)
   } catch (error) {
-    console.log(`Error Seeding DB, ${error}`);
+    console.log(`Error Seeding DB, ${error}`)
   }
-};
+}
 
-module.exports = seed;
+module.exports = seed
