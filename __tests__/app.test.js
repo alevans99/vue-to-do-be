@@ -1,9 +1,9 @@
-const db = require("../db/connection")
-const testData = require("../db/test-data/notes")
-const seed = require("../db/seeds/seed")
-const request = require("supertest")
-const app = require("../app")
-const { DateTime } = require("luxon")
+const db = require('../db/connection')
+const testData = require('../db/test-data/notes')
+const seed = require('../db/seeds/seed')
+const request = require('supertest')
+const app = require('../app')
+const { DateTime } = require('luxon')
 
 //Every time the tests are run, the test DB is dropped and repopulated
 //with the test data. The DB connection is ended on test completion.
@@ -15,289 +15,130 @@ afterAll(() => {
 })
 
 //Tests are organised by route, with each Request type nested within each.
-describe("app.js", () => {
-  describe("/api", () => {
-    describe("GET", () => {
-      it("should send a connected message with 200 status", () => {
+describe('app.js', () => {
+  describe('/api', () => {
+    describe('GET', () => {
+      it('should send a connected message with 200 status', () => {
         return request(app)
-          .get("/api")
+          .get('/api')
           .expect(200)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Connected to the API")
+            expect(message).toBe('Connected to the API')
           })
       })
     })
 
-    describe("POST", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('POST', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .post("/api")
+          .post('/api')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
 
-    describe("PATCH", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('PATCH', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .patch("/api")
+          .patch('/api')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
 
-    describe("DELETE", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('DELETE', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .delete("/api")
+          .delete('/api')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
   })
 
-  describe("/api/notes", () => {
-    describe("POST", () => {
-      it("should return a 201 status and the new note when posted", () => {
+  describe('/api/notes', () => {
+    describe('POST', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .post("/api/notes")
-          .send({
-            note: {
-              listId: "test",
-              title: "This is a new title from insomnia",
-              text: "Here is all the text from the insomnia test",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 1,
-              deadline: "2022-04-18T17:30:00.000Z",
-            },
-          })
-          .expect(201)
-          .then(({ body: { note } }) => {
-            expect(Object.keys(note)).toHaveLength(7)
-            expect(note).toMatchObject({
-              note_id: expect.any(Number),
-              list_id: expect.any(String),
-              note_title: expect.any(String),
-              note_text: expect.any(String),
-              timestamp: expect.any(String),
-              priority: expect.any(Number),
-              deadline: expect.any(String),
-            })
-          })
-      })
-      it("should return a 400 status when the correct fields are not provided", () => {
-        return request(app)
-          .post("/api/notes")
-          .send({
-            note: {
-              listId: "test",
-              text: "Here is all the text from the insomnia test",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 1,
-              deadline: "2022-04-18T17:30:00.000Z",
-            },
-          })
-          .expect(400)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid note format")
-          })
-      })
-
-      it("should return a 400 status when the incorrect field types are provided", () => {
-        return request(app)
-          .post("/api/notes")
-          .send({
-            note: {
-              listId: "test",
-              title: 3,
-              text: "Here is all the text from the insomnia test",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 1,
-              deadline: "2022-04-18T17:30:00.000Z",
-            },
-          })
-          .expect(400)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid note format")
-          })
-      })
-    })
-
-    describe("PATCH", () => {
-      it("should return a 201 status and the updated note when patched", () => {
-        return request(app)
-          .patch("/api/notes")
-          .send({
-            note: {
-              noteId: 1,
-              listId: "test",
-              title: "updated title",
-              text: "updated text",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 2,
-              deadline: "2024-04-16T14:06:00.000Z",
-            },
-          })
-          .expect(201)
-          .then(({ body: { note } }) => {
-            expect(Object.keys(note)).toHaveLength(7)
-            expect(note).toMatchObject({
-              note_id: expect.any(Number),
-              list_id: expect.any(String),
-              note_title: expect.any(String),
-              note_text: expect.any(String),
-              timestamp: expect.any(String),
-              priority: expect.any(Number),
-              deadline: expect.any(String),
-            })
-            expect(note.note_id).toBe(1)
-            expect(note.note_title).toBe("updated title")
-            expect(note.note_text).toBe("updated text")
-            expect(note.priority).toBe(2)
-            expect(note.deadline).toBe("2024-04-16T14:06:00.000Z")
-          })
-      })
-
-      it("should return a 400 status when missing a key", () => {
-        return request(app)
-          .patch("/api/notes")
-          .send({
-            note: {
-              noteId: 1,
-              listId: "test",
-              text: "updated text",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 2,
-              deadline: "2024-04-16T14:06:00.000Z",
-            },
-          })
-          .expect(400)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid note format")
-          })
-      })
-
-      it("should return a 400 status key is the wrong type", () => {
-        return request(app)
-          .patch("/api/notes")
-          .send({
-            note: {
-              noteId: 1,
-              title: 4,
-              listId: "test",
-              text: "updated text",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 2,
-              deadline: "2024-04-16T14:06:00.000Z",
-            },
-          })
-          .expect(400)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid note format")
-          })
-      })
-
-      it("should return a 404 status when trying to update a note that doesn't exist", () => {
-        return request(app)
-          .patch("/api/notes")
-          .send({
-            note: {
-              noteId: 999,
-              title: "New Title",
-              listId: "test",
-              text: "updated text",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 2,
-              deadline: "2024-04-16T14:06:00.000Z",
-            },
-          })
-          .expect(404)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Note not found")
-          })
-      })
-
-      it("should return a 400 status when including an incorrect key", () => {
-        return request(app)
-          .patch("/api/notes")
-          .send({
-            note: {
-              noteId: 1,
-              listId: "test",
-              incorrect: "updated title",
-              text: "updated text",
-              timestamp: "2022-04-16T14:06:00.000Z",
-              priority: 2,
-              deadline: "2024-04-16T14:06:00.000Z",
-            },
-          })
-          .expect(400)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid note format")
-          })
-      })
-    })
-
-    describe("DELETE", () => {
-      it("Should send an error message with 405 status", () => {
-        return request(app)
-          .delete("/api/notes")
+          .post('/api/notes')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
 
-    describe("GET", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('PATCH', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .get("/api/notes")
+          .patch('/api/notes')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
+          })
+      })
+    })
+    describe('DELETE', () => {
+      it('Should send an error message with 405 status', () => {
+        return request(app)
+          .delete('/api/notes')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Method Not Allowed')
+          })
+      })
+    })
+
+    describe('GET', () => {
+      it('Should send an error message with 405 status', () => {
+        return request(app)
+          .get('/api/notes')
+          .expect(405)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
   })
 
-  describe("/api/notes/:list_id", () => {
-    describe("GET", () => {
-      it("should return a 200 status with a list of notes", () => {
+  describe('/api/notes/:list_id', () => {
+    describe('GET', () => {
+      it('should return a 200 status with a list of notes', () => {
         return request(app)
-          .get("/api/notes/test")
+          .get('/api/notes/test')
           .expect(200)
           .then(({ body: { notes } }) => {
             expect(notes).toHaveLength(2)
             notes.forEach((note) => {
-              expect(Object.keys(note)).toHaveLength(7)
+              expect(Object.keys(note)).toHaveLength(8)
               expect(note).toMatchObject({
-                note_id: expect.any(Number),
-                list_id: expect.any(String),
-                note_title: expect.any(String),
-                note_text: expect.any(String),
+                noteId: expect.any(Number),
+                listId: expect.any(String),
+                noteTitle: expect.any(String),
+                noteText: expect.any(String),
                 timestamp: expect.any(String),
                 priority: expect.any(Number),
                 deadline: expect.any(String),
+                complete: expect.any(Boolean),
               })
             })
           })
       })
 
-      it("should return the notes ascending by descending date by default", () => {
+      it('should return the notes ascending by descending date by default', () => {
         return request(app)
-          .get("/api/notes/test")
+          .get('/api/notes/test')
           .then(({ body: { notes } }) => {
-            let referenceDate = ""
+            let referenceDate = ''
             let orderedByDate = true
             for (note of notes) {
-              if (referenceDate === "") {
+              if (referenceDate === '') {
                 referenceDate = note.timestamp
               }
               if (note.timestamp > referenceDate) {
@@ -309,14 +150,14 @@ describe("app.js", () => {
           })
       })
 
-      it("should allow queries to change the order direction of the results", () => {
+      it('should allow queries to change the order direction of the results', () => {
         return request(app)
-          .get("/api/notes/test?order=asc")
+          .get('/api/notes/test?order=asc')
           .then(({ body: { notes } }) => {
-            let referenceDate = ""
+            let referenceDate = ''
             let orderedByDate = true
             for (note of notes) {
-              if (referenceDate === "") {
+              if (referenceDate === '') {
                 referenceDate = note.timestamp
               }
               if (note.timestamp < referenceDate) {
@@ -328,15 +169,15 @@ describe("app.js", () => {
           })
       })
 
-      it("should allow queries to sort by title", () => {
+      it('should allow queries to sort by title', () => {
         return request(app)
-          .get("/api/notes/test?order=asc&order_by=title")
+          .get('/api/notes/test?order=asc&order_by=title')
           .then(({ body: { notes } }) => {
-            let referenceTitle = ""
+            let referenceTitle = ''
             let orderedByTitle = true
 
             for (note of notes) {
-              if (referenceTitle === "") {
+              if (referenceTitle === '') {
                 referenceTitle = note.note_title
               }
               if (note.note_title < referenceTitle) {
@@ -348,9 +189,9 @@ describe("app.js", () => {
           })
       })
 
-      it("should allow queries to sort by priority", () => {
+      it('should allow queries to sort by priority', () => {
         return request(app)
-          .get("/api/notes/test?order=desc&order_by=priority")
+          .get('/api/notes/test?order=desc&order_by=priority')
           .then(({ body: { notes } }) => {
             let referencePriority = -1
             let orderedByPriority = true
@@ -368,14 +209,14 @@ describe("app.js", () => {
           })
       })
 
-      it("should allow queries to sort by deadline", () => {
+      it('should allow queries to sort by deadline', () => {
         return request(app)
-          .get("/api/notes/test?order=asc&order_by=deadline")
+          .get('/api/notes/test?order=asc&order_by=deadline')
           .then(({ body: { notes } }) => {
-            let referenceDate = ""
+            let referenceDate = ''
             let orderedByDate = true
             for (note of notes) {
-              if (referenceDate === "") {
+              if (referenceDate === '') {
                 referenceDate = note.deadline
               }
               if (note.deadline < referenceDate) {
@@ -387,79 +228,245 @@ describe("app.js", () => {
           })
       })
 
-      it("Should send an error message with 400 status when incorrect order criteria supplied", () => {
+      it('Should send an error message with 400 status when incorrect order criteria supplied', () => {
         return request(app)
-          .get("/api/notes/test?order=wrong")
+          .get('/api/notes/test?order=wrong')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid request")
+            expect(message).toBe('Invalid request')
           })
       })
 
-      it("Should send an error message with 400 status when incorrect order direction supplied", () => {
+      it('Should send an error message with 400 status when incorrect order direction supplied', () => {
         return request(app)
-          .get("/api/notes/test?order_by=wrong")
+          .get('/api/notes/test?order_by=wrong')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid request")
+            expect(message).toBe('Invalid request')
           })
       })
 
-      it("Should send an error message with 400 status when incorrect list formatting used", () => {
+      it('Should send an error message with 400 status when incorrect list formatting used', () => {
         return request(app)
-          .get("/api/notes/test one")
+          .get('/api/notes/test one')
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Invalid list requested")
+            expect(message).toBe('Invalid list requested')
           })
       })
-      
     })
 
-    describe("DELETE", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('DELETE', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .delete("/api/notes/test")
+          .delete('/api/notes/test')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
 
-    describe("POST", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('POST', () => {
+      it('should return a 201 status and the new note when posted', () => {
         return request(app)
-          .post("/api/notes/test")
-          .expect(405)
-          .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+          .post('/api/notes/test')
+          .send({
+            note: {
+              listId: 'test',
+              title: 'This is a new title from insomnia',
+              text: 'Here is all the text from the insomnia test',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 1,
+              deadline: '2022-04-18T17:30:00.000Z',
+              complete: false,
+            },
+          })
+          .expect(201)
+          .then(({ body: { note } }) => {
+            expect(Object.keys(note)).toHaveLength(8)
+            expect(note).toMatchObject({
+              noteId: expect.any(Number),
+              listId: expect.any(String),
+              noteTitle: expect.any(String),
+              noteText: expect.any(String),
+              timestamp: expect.any(String),
+              priority: expect.any(Number),
+              deadline: expect.any(String),
+              complete: expect.any(Boolean),
+            })
           })
       })
-    })
-
-    describe("PATCH", () => {
-      it("Should send an error message with 405 status", () => {
+      it('should return a 400 status when the correct fields are not provided', () => {
         return request(app)
-          .patch("/api/notes/test")
-          .expect(405)
+          .post('/api/notes/test')
+          .send({
+            note: {
+              listId: 'test',
+              text: 'Here is all the text from the insomnia test',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 1,
+              deadline: '2022-04-18T17:30:00.000Z',
+            },
+          })
+          .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Invalid note format')
+          })
+      })
+
+      it('should return a 400 status when the incorrect field types are provided', () => {
+        return request(app)
+          .post('/api/notes/test')
+          .send({
+            note: {
+              listId: 'test',
+              title: 3,
+              text: 'Here is all the text from the insomnia test',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 1,
+              deadline: '2022-04-18T17:30:00.000Z',
+              complete: 'true',
+            },
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Invalid note format')
           })
       })
     })
 
+    describe('PATCH', () => {
+      it('should return a 201 status and the updated note when patched', () => {
+        return request(app)
+          .patch('/api/notes/test')
+          .send({
+            note: {
+              noteId: 1,
+              listId: 'test',
+              title: 'updated title',
+              text: 'updated text',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 2,
+              deadline: '2024-04-16T14:06:00.000Z',
+              complete: true,
+            },
+          })
+          .expect(201)
+          .then(({ body: { note } }) => {
+            expect(Object.keys(note)).toHaveLength(8)
+            expect(note).toMatchObject({
+              noteId: expect.any(Number),
+              listId: expect.any(String),
+              noteTitle: expect.any(String),
+              noteText: expect.any(String),
+              timestamp: expect.any(String),
+              priority: expect.any(Number),
+              deadline: expect.any(String),
+              complete: expect.any(Boolean),
+            })
+            expect(note.noteId).toBe(1)
+            expect(note.noteTitle).toBe('updated title')
+            expect(note.noteText).toBe('updated text')
+            expect(note.priority).toBe(2)
+            expect(note.deadline).toBe('2024-04-16T14:06:00.000Z')
+            expect(note.complete).toBe(true)
+          })
+      })
+
+      it('should return a 400 status when missing a key', () => {
+        return request(app)
+          .patch('/api/notes/test')
+          .send({
+            note: {
+              noteId: 1,
+              listId: 'test',
+              text: 'updated text',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 2,
+              deadline: '2024-04-16T14:06:00.000Z',
+            },
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Invalid note format')
+          })
+      })
+
+      it('should return a 400 status key is the wrong type', () => {
+        return request(app)
+          .patch('/api/notes/test')
+          .send({
+            note: {
+              noteId: 1,
+              title: 4,
+              listId: 'test',
+              text: 'updated text',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 2,
+              deadline: '2024-04-16T14:06:00.000Z',
+              complete: 'true',
+            },
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Invalid note format')
+          })
+      })
+
+      it("should return a 404 status when trying to update a note that doesn't exist", () => {
+        return request(app)
+          .patch('/api/notes/test')
+          .send({
+            note: {
+              noteId: 999,
+              title: 'New Title',
+              listId: 'test',
+              text: 'updated text',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 2,
+              deadline: '2024-04-16T14:06:00.000Z',
+              complete: false,
+            },
+          })
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Note not found')
+          })
+      })
+
+      it('should return a 400 status when including an incorrect key', () => {
+        return request(app)
+          .patch('/api/notes/test')
+          .send({
+            note: {
+              noteId: 1,
+              listId: 'test',
+              incorrect: 'updated title',
+              text: 'updated text',
+              timestamp: '2022-04-16T14:06:00.000Z',
+              priority: 2,
+              deadline: '2024-04-16T14:06:00.000Z',
+              complete: false,
+            },
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe('Invalid note format')
+          })
+      })
+    })
   })
 
-  describe("/api/notes/:list_id/:note_id", () => {
-    describe("DELETE", () => {
-      it("should remove the note and return a 204 status", () => {
+  describe('/api/notes/:list_id/:note_id', () => {
+    describe('DELETE', () => {
+      it('should remove the note and return a 204 status', () => {
         return request(app)
-          .delete("/api/notes/test/1")
+          .delete('/api/notes/test/1')
           .expect(204)
           .then(() => {
             return request(app)
-              .get("/api/notes/test")
+              .get('/api/notes/test')
               .expect(200)
               .then(({ body: { notes } }) => {
                 expect(notes).toHaveLength(1)
@@ -469,52 +476,52 @@ describe("app.js", () => {
 
       it("should return a 404 status when trying to delete a note that doesn't exist", () => {
         return request(app)
-        .delete("/api/notes/test/1000")
+          .delete('/api/notes/test/1000')
           .expect(404)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Note not found")
+            expect(message).toBe('Note not found')
           })
       })
 
-      it("should return a 404 status when incorrect note ID provided", () => {
+      it('should return a 404 status when incorrect note ID provided', () => {
         return request(app)
-        .delete("/api/notes/test/Wrong")
+          .delete('/api/notes/test/Wrong')
           .expect(404)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Note not found")
+            expect(message).toBe('Note not found')
           })
       })
     })
 
-    describe("POST", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('POST', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .post("/api/notes/test/1")
+          .post('/api/notes/test/1')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
 
-    describe("PATCH", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('PATCH', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .patch("/api/notes/test/1")
+          .patch('/api/notes/test/1')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })
 
-    describe("GET", () => {
-      it("Should send an error message with 405 status", () => {
+    describe('GET', () => {
+      it('Should send an error message with 405 status', () => {
         return request(app)
-          .get("/api/notes/test/1")
+          .get('/api/notes/test/1')
           .expect(405)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Method Not Allowed")
+            expect(message).toBe('Method Not Allowed')
           })
       })
     })

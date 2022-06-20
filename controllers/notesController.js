@@ -31,6 +31,8 @@ exports.addNewNote = async (req, res, next) => {
 exports.updateNote = async (req, res, next) => {
   try {
     const noteToUpdate = req.body.note
+    console.log('patch ', noteToUpdate)
+
     const updatedNote = await patchNote(noteToUpdate)
 
     res.status(201).send(updatedNote)

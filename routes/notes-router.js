@@ -7,12 +7,13 @@ const {
   removeNoteById,
 } = require('../controllers/notesController')
 
-notesRouter.route('/').patch(updateNote).all(handleMethodNotAllowed)
+notesRouter.route('/').all(handleMethodNotAllowed)
 
 notesRouter
   .route('/:list_id')
   .get(getAllNotesByListId)
   .post(addNewNote)
+  .patch(updateNote)
   .all(handleMethodNotAllowed)
 
 notesRouter

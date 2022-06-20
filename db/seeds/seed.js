@@ -13,7 +13,8 @@ const seed = async (data) => {
                 note_text TEXT NOT NULL,
                 timestamp TIMESTAMP NOT NULL,
                 priority INTEGER DEFAULT 2,
-                deadline TIMESTAMP DEFAULT NULL
+                deadline TIMESTAMP DEFAULT NULL,
+                complete BOOLEAN DEFAULT FALSE
             );`
     )
     const notesToInsert = noteData
