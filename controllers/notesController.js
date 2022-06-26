@@ -8,8 +8,6 @@ const { DateTime } = require('luxon')
 exports.getAllNotesByListId = async (req, res, next) => {
   try {
     const { list_id: listId } = req.params
-    console.log('received request for list ', listId)
-
     const { order: orderDirection, order_by: orderBy } = req.query
     const notes = await selectAllNotesByListId(listId, orderBy, orderDirection)
     res.status(200).send(notes)
@@ -31,8 +29,6 @@ exports.addNewNote = async (req, res, next) => {
 exports.updateNote = async (req, res, next) => {
   try {
     const noteToUpdate = req.body.note
-    console.log('patch ', noteToUpdate)
-
     const updatedNote = await patchNote(noteToUpdate)
 
     res.status(201).send(updatedNote)

@@ -87,7 +87,7 @@ exports.insertNewNote = async (newNote) => {
   return { note: formatSqlNoteAsJs(note) }
 }
 
-exports.patchNote = async (noteToInsert) => {
+exports.patchNote = async (noteToUpdate) => {
   const noteColumns = {
     noteId: 'number',
     listId: 'string',
@@ -98,26 +98,26 @@ exports.patchNote = async (noteToInsert) => {
     deadline: 'string',
     complete: 'boolean',
   }
+  const nullAllowed = ['deadline']
 
   //Check updated note has all required values and they are the correct type
-  if (Object.keys(noteToInsert).length !== 8) {
-    console.log('issue with length ')
+  if (Object.keys(noteToUpdate).length !== 8) {
     return Promise.reject({ status: 400, message: 'Invalid note format' })
   }
-  for (key of Object.keys(noteToInsert)) {
+  for (key of Object.keys(noteToUpdate)) {
     if (
       noteColumns[key] === undefined ||
-      typeof noteToInsert[key] !== noteColumns[key]
+      (typeof noteToUpdate[key] !== noteColumns[key] &&
+        noteToUpdate[key] !== null &&
+        !nullAllowed.includes(key))
     ) {
-      console.log('issue with key ', key)
-
       return Promise.reject({ status: 400, message: 'Invalid note format' })
     }
   }
   //Check that note to be updated exists
   const { rows: existingNotes } = await db.query(
     'SELECT * FROM notes WHERE note_id = $1',
-    [noteToInsert.noteId]
+    [noteToUpdate.noteId]
   )
 
   if (existingNotes.length !== 1) {
@@ -132,12 +132,12 @@ exports.patchNote = async (noteToInsert) => {
   const {
     rows: [note],
   } = await db.query(queryString, [
-    noteToInsert.noteTitle,
-    noteToInsert.noteText,
-    noteToInsert.priority,
-    DateTime.fromISO(noteToInsert.deadline).toSQL(),
-    noteToInsert.complete,
-    noteToInsert.noteId,
+    noteToUpdate.noteTitle,
+    noteToUpdate.noteText,
+    noteToUpdate.priority,
+    DateTime.fromISO(noteToUpdate.deadline).toSQL(),
+    noteToUpdate.complete,
+    noteToUpdate.noteId,
   ])
 
   return { note: formatSqlNoteAsJs(note) }
