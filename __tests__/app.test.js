@@ -274,8 +274,8 @@ describe('app.js', () => {
           .send({
             note: {
               listId: 'test',
-              title: 'This is a new title from insomnia',
-              text: 'Here is all the text from the insomnia test',
+              noteTitle: 'This is a new title from insomnia',
+              noteText: 'Here is all the text from the insomnia test',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 1,
               deadline: '2022-04-18T17:30:00.000Z',
@@ -303,7 +303,7 @@ describe('app.js', () => {
           .send({
             note: {
               listId: 'test',
-              text: 'Here is all the text from the insomnia test',
+              noteText: 'Here is all the text from the insomnia test',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 1,
               deadline: '2022-04-18T17:30:00.000Z',
@@ -321,8 +321,8 @@ describe('app.js', () => {
           .send({
             note: {
               listId: 'test',
-              title: 3,
-              text: 'Here is all the text from the insomnia test',
+              noteTitle: 3,
+              noteText: 'Here is all the text from the insomnia test',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 1,
               deadline: '2022-04-18T17:30:00.000Z',
@@ -344,8 +344,8 @@ describe('app.js', () => {
             note: {
               noteId: 1,
               listId: 'test',
-              title: 'updated title',
-              text: 'updated text',
+              noteTitle: 'updated title',
+              noteText: 'updated text',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 2,
               deadline: '2024-04-16T14:06:00.000Z',
@@ -381,7 +381,7 @@ describe('app.js', () => {
             note: {
               noteId: 1,
               listId: 'test',
-              text: 'updated text',
+              noteText: 'updated text',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 2,
               deadline: '2024-04-16T14:06:00.000Z',
@@ -399,9 +399,9 @@ describe('app.js', () => {
           .send({
             note: {
               noteId: 1,
-              title: 4,
+              noteTitle: 4,
               listId: 'test',
-              text: 'updated text',
+              noteText: 'updated text',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 2,
               deadline: '2024-04-16T14:06:00.000Z',
@@ -420,9 +420,9 @@ describe('app.js', () => {
           .send({
             note: {
               noteId: 999,
-              title: 'New Title',
+              noteTitle: 'New Title',
               listId: 'test',
-              text: 'updated text',
+              noteText: 'updated text',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 2,
               deadline: '2024-04-16T14:06:00.000Z',
@@ -443,7 +443,7 @@ describe('app.js', () => {
               noteId: 1,
               listId: 'test',
               incorrect: 'updated title',
-              text: 'updated text',
+              noteText: 'updated text',
               timestamp: '2022-04-16T14:06:00.000Z',
               priority: 2,
               deadline: '2024-04-16T14:06:00.000Z',
