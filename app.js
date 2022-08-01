@@ -9,10 +9,13 @@ const {
 const app = express()
 
 //CORS
-const corsConfig = {
-  origin: 'http://localhost:8080',
-  optionsSuccessStatus: 200,
-}
+const corsConfig =
+  ENV === 'production'
+    ? {
+        origin: 'http://localhost:8080',
+        optionsSuccessStatus: 200,
+      }
+    : {}
 app.use(cors(corsConfig))
 app.use(express.json())
 app.use('/api', apiRouter)
