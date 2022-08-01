@@ -7,10 +7,10 @@ const {
   handleServerErrors,
 } = require('./controllers/errorsController')
 const app = express()
-
+const ENV = process.env.NODE_ENV || 'development'
 //CORS
 const corsConfig =
-  ENV === 'production'
+  ENV !== 'production'
     ? {
         origin: 'http://localhost:8080',
         optionsSuccessStatus: 200,
